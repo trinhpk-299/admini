@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f1011">
+<title>Admini</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  html, body { margin: 0; height: 100%; background: #0f1011; }
+  iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+</style>
+</head>
+<body>
+<iframe id="app" title="Admini" allow="clipboard-write; fullscreen"></iframe>
+<script>
+  /* ===== Admini – trang vỏ (GitHub Pages) =====
+     Nhúng web app Apps Script vào iframe để ẩn dòng "Ứng dụng này do một người dùng Google Apps Script tạo".
+     CHỈ CẦN SỬA DÒNG DƯỚI: dán link /exec của bản deploy web app. */
+  var EXEC_URL = 'https://script.google.com/a/macros/ownego.com/s/AKfycbzhA77flDRb91hDR1MRk1Ga_x27DApuJhAe8euck-Bv8_dUCCzg51EvBYW8H6FYTzk/exec';
+
+  (function () {
+    // Slack đăng nhập xong sẽ quay về trang này với ?code=…&state=… -> chuyển tiếp vào app
+    var q = new URLSearchParams(location.search), pass = new URLSearchParams();
+    ['code', 'state', 'error'].forEach(function (k) { if (q.has(k)) pass.set(k, q.get(k)); });
+    var qs = pass.toString();
+    document.getElementById('app').src = EXEC_URL + (qs ? '?' + qs : '') + location.hash;
+    // Xoá mã đăng nhập khỏi thanh địa chỉ (F5 không gửi lại mã cũ)
+    if (qs) history.replaceState(null, '', location.pathname + location.hash);
+
+    // App báo tab đang xem -> ghi lên thanh địa chỉ để F5 vẫn ở đúng trang
+    window.addEventListener('message', function (e) {
+      var host = '';
+      try { host = new URL(e.origin).hostname; } catch (err) { return; }
+      if (!/\.googleusercontent\.com$/.test(host)) return;
+      var d = e.data || {};
+      if (typeof d.hrTab === 'string') history.replaceState(null, '', location.pathname + (d.hrTab ? '#' + d.hrTab : ''));
+    });
+  })();
+</script>
+</body>
+</html>
